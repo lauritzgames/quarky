@@ -859,6 +859,20 @@ async function ensureUploadedFilesTable(database) {
     `);
 }
 
+async function ensureLoginAttemptsTable(database) {
+    await database.query(`
+        CREATE TABLE IF NOT EXISTS login_attempts (
+            username_key VARCHAR(64) NOT NULL,
+            ip_address VARCHAR(64) NOT NULL,
+            failed_attempts INT NOT NULL DEFAULT 0,
+            locked_until DATETIME NULL,
+            last_failed_at DATETIME NULL,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            PRIMARY KEY (username_key, ip_address)
+        )
+    `);
+}
+
 function mapSiteSettingsRow(row = {}) {
     return {
         registrationsEnabled: Boolean(row.registrations_enabled),
@@ -1306,6 +1320,7 @@ async function initializeDatabase() {
     await ensureUserFollowsTable(database);
     await ensureNotificationsTable(database);
     await ensureUploadedFilesTable(database);
+    await ensureLoginAttemptsTable(database);
     await database.query(`
         CREATE TABLE IF NOT EXISTS sessions (
             id INT AUTO_INCREMENT PRIMARY KEY,
@@ -1722,6 +1737,100 @@ async function deleteSession(token) {
 async function deleteSessionsForUser(userDbId) {
     const database = getPool();
     await database.query('DELETE FROM sessions WHERE user_id = ?', [userDbId]);
+}
+
+function normalizeLoginAttemptKey(value) {
+    return String(value || '').trim().toLowerCase().slice(0, 64);
+}
+
+function normalizeIpAddress(value) {
+    return String(value || '').trim().slice(0, 64);
+}
+
+async function getLoginAttemptState(username, ipAddress) {
+    const database = getPool();
+    const usernameKey = normalizeLoginAttemptKey(username);
+    const normalizedIpAddress = normalizeIpAddress(ipAddress);
+
+    if (!usernameKey || !normalizedIpAddress) {
+        return { failedAttempts: 0, isLocked: false, lockedUntil: null };
+    }
+
+    await database.query(
+        `
+            DELETE FROM login_attempts
+            WHERE locked_until IS NOT NULL
+              AND locked_until <= NOW()
+        `
+    );
+
+    const [rows] = await database.query(
+        `
+            SELECT failed_attempts, locked_until
+            FROM login_attempts
+            WHERE username_key = ? AND ip_address = ?
+            LIMIT 1
+        `,
+        [usernameKey, normalizedIpAddress]
+    );
+
+    if (!rows[0]) {
+        return { failedAttempts: 0, isLocked: false, lockedUntil: null };
+    }
+
+    const lockedUntil = rows[0].locked_until || null;
+    const isLocked = Boolean(lockedUntil && new Date(lockedUntil).getTime() > Date.now());
+
+    return {
+        failedAttempts: Number(rows[0].failed_attempts) || 0,
+        isLocked,
+        lockedUntil
+    };
+}
+
+async function recordFailedLoginAttempt(username, ipAddress, options = {}) {
+    const database = getPool();
+    const usernameKey = normalizeLoginAttemptKey(username);
+    const normalizedIpAddress = normalizeIpAddress(ipAddress);
+    const maxAttempts = Math.max(1, Number(options.maxAttempts) || 4);
+    const lockMinutes = Math.max(1, Number(options.lockMinutes) || 10);
+
+    if (!usernameKey || !normalizedIpAddress) {
+        return { failedAttempts: 0, isLocked: false, lockedUntil: null };
+    }
+
+    await database.query(
+        `
+            INSERT INTO login_attempts (username_key, ip_address, failed_attempts, locked_until, last_failed_at)
+            VALUES (?, ?, 1, NULL, NOW())
+            ON DUPLICATE KEY UPDATE
+                failed_attempts = IF(locked_until IS NOT NULL AND locked_until > NOW(), failed_attempts, failed_attempts + 1),
+                locked_until = IF(
+                    locked_until IS NOT NULL AND locked_until > NOW(),
+                    locked_until,
+                    IF(failed_attempts + 1 >= ?, DATE_ADD(NOW(), INTERVAL ? MINUTE), NULL)
+                ),
+                last_failed_at = NOW()
+        `,
+        [usernameKey, normalizedIpAddress, maxAttempts, lockMinutes]
+    );
+
+    return getLoginAttemptState(usernameKey, normalizedIpAddress);
+}
+
+async function clearLoginAttemptState(username, ipAddress) {
+    const database = getPool();
+    const usernameKey = normalizeLoginAttemptKey(username);
+    const normalizedIpAddress = normalizeIpAddress(ipAddress);
+
+    if (!usernameKey || !normalizedIpAddress) {
+        return;
+    }
+
+    await database.query(
+        'DELETE FROM login_attempts WHERE username_key = ? AND ip_address = ?',
+        [usernameKey, normalizedIpAddress]
+    );
 }
 
 async function storePendingTwoFactorSecret(userDbId, secret) {
@@ -2628,6 +2737,7 @@ module.exports = {
     buildFileUrl,
     buildMediaUrl,
     clearAllReports,
+    clearLoginAttemptState,
     countAdmins,
     countProjectsForUser,
     createAuditLog,
@@ -2659,6 +2769,7 @@ module.exports = {
     getAuditLogs,
     getCommentById,
     getFollowedUserIds,
+    getLoginAttemptState,
     getCommentsForProject,
     getLatestCommentTimestampForUser,
     getLatestProjectTimestampForUser,
@@ -2691,6 +2802,7 @@ module.exports = {
     normalizeProfileMedia,
     normalizeTag,
     normalizeTags,
+    recordFailedLoginAttempt,
     refreshProjectEngagementCounts,
     replaceUserTwoFactorBackupCodes,
     setCommentHidden,
