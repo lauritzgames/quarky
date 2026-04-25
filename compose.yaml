@@ -1,6 +1,6 @@
 services:
   app:
-    image: ${APP_IMAGE:-yourdockerhubname/quarky:latest}
+    image: ${APP_IMAGE:-lausestorm/quarky:latest}
     container_name: quarky-app
     restart: unless-stopped
     depends_on:
