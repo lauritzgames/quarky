@@ -1,13 +1,11 @@
 services:
   app:
-    build: .
+    image: ${APP_IMAGE:-yourdockerhubname/quarky:latest}
     container_name: quarky-app
     restart: unless-stopped
     depends_on:
       db:
         condition: service_healthy
-    env_file:
-      - .env.container
     ports:
       - "3000:3000" 
     volumes:
@@ -17,18 +15,32 @@ services:
       PORT: 3000
       MYSQL_HOST: db
       MYSQL_PORT: 3306
-      MYSQL_USER: quarky
-      MYSQL_DATABASE: quarky
+      MYSQL_USER: ${MYSQL_USER:-quarky}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-quarky}
+      APP_ENCRYPTION_KEY: ${APP_ENCRYPTION_KEY}
+      SESSION_TTL_HOURS: ${SESSION_TTL_HOURS:-168}
+      COOKIE_SECURE: ${COOKIE_SECURE:-true}
+      DB_INIT_RETRIES: ${DB_INIT_RETRIES:-120}
+      DB_INIT_DELAY_MS: ${DB_INIT_DELAY_MS:-5000}
+      TRUST_PROXY: ${TRUST_PROXY:-1}
+      HARD_UPLOAD_SIZE_MB: ${HARD_UPLOAD_SIZE_MB:-250}
+      BOOTSTRAP_ADMIN_USERNAME: ${BOOTSTRAP_ADMIN_USERNAME:-admin}
+      BOOTSTRAP_ADMIN_EMAIL: ${BOOTSTRAP_ADMIN_EMAIL:-admin@example.com}
+      BOOTSTRAP_ADMIN_PASSWORD: ${BOOTSTRAP_ADMIN_PASSWORD:-admin}
+      DISPOSABLE_EMAIL_DOMAINS: ${DISPOSABLE_EMAIL_DOMAINS:-}
+      RECAPTCHA_SITE_KEY: ${RECAPTCHA_SITE_KEY:-}
+      RECAPTCHA_SECRET_KEY: ${RECAPTCHA_SECRET_KEY:-}
 
   db:
     image: mysql:8.4
     container_name: quarky-db
     restart: unless-stopped
-    env_file:
-      - .env.container
     environment:
-      MYSQL_DATABASE: quarky
-      MYSQL_USER: quarky
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-quarky}
+      MYSQL_USER: ${MYSQL_USER:-quarky}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     volumes:
       - mysql_data:/var/lib/mysql
     healthcheck:
