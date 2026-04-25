@@ -9,6 +9,7 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const {
     clearAllReports,
+    clearLoginAttemptState,
     countAdmins,
     countProjectsForUser,
     createAuditLog,
@@ -39,6 +40,7 @@ const {
     getCommentsForProject,
     getFollowedUserIds,
     getLatestCommentTimestampForUser,
+    getLoginAttemptState,
     getLatestProjectTimestampForUser,
     getLatestUploads,
     getNotificationsForUser,
@@ -59,6 +61,7 @@ const {
     isFollowingUser,
     listInviteCodes,
     markAllNotificationsRead,
+    recordFailedLoginAttempt,
     replaceUserTwoFactorBackupCodes,
     setCommentHidden,
     setUserApprovalStatus,
@@ -173,6 +176,9 @@ const authRateLimiter = rateLimit({
     handler: rateLimitHandler
 });
 
+const loginMaxFailedAttempts = Math.max(1, Number(process.env.LOGIN_MAX_FAILED_ATTEMPTS || 4));
+const loginLockoutMinutes = Math.max(1, Number(process.env.LOGIN_LOCKOUT_MINUTES || 10));
+
 const projectMutationLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
     limit: Number(process.env.PROJECT_MUTATION_RATE_LIMIT || 30),
@@ -203,6 +209,21 @@ function parseTrustProxy(value) {
 
 function rateLimitHandler(_req, res, _next, options) {
     return res.status(options.statusCode).json(options.message);
+}
+
+function sendLoginLockoutResponse(res, lockedUntil) {
+    const lockedUntilDate = lockedUntil ? new Date(lockedUntil) : null;
+    const retryAfterSeconds = lockedUntilDate
+        ? Math.max(1, Math.ceil((lockedUntilDate.getTime() - Date.now()) / 1000))
+        : loginLockoutMinutes * 60;
+    const retryAfterMinutes = Math.max(1, Math.ceil(retryAfterSeconds / 60));
+
+    res.setHeader('Retry-After', String(retryAfterSeconds));
+    return res.status(429).json({
+        error: `Too many failed login attempts from this IP for that username. Try again in ${retryAfterMinutes} minute${retryAfterMinutes === 1 ? '' : 's'}.`,
+        retryAfterSeconds,
+        lockedUntil: lockedUntilDate ? lockedUntilDate.toISOString() : null
+    });
 }
 
 function parseCookies(cookieHeader = '') {
@@ -1657,14 +1678,27 @@ app.post('/api/login', authRateLimiter, withApiError(async (req, res) => {
     const username = String(req.body.username || '').trim();
     const password = String(req.body.password || '');
     const otp = String(req.body.otp || '').trim();
+    const clientIp = String(req.ip || req.socket?.remoteAddress || '').trim();
 
     if (!username || !password) {
         return res.status(400).json({ error: 'Username and password are required.' });
     }
 
+    const loginAttemptState = await getLoginAttemptState(username, clientIp);
+    if (loginAttemptState.isLocked) {
+        return sendLoginLockoutResponse(res, loginAttemptState.lockedUntil);
+    }
+
     const user = await findUserByUsername(username);
     if (!user || !verifyPassword(password, user.passwordHash)) {
+        const failedAttemptState = await recordFailedLoginAttempt(username, clientIp, {
+            maxAttempts: loginMaxFailedAttempts,
+            lockMinutes: loginLockoutMinutes
+        });
         await sleep(350);
+        if (failedAttemptState.isLocked) {
+            return sendLoginLockoutResponse(res, failedAttemptState.lockedUntil);
+        }
         return res.status(401).json({ error: 'Invalid username or password.' });
     }
 
@@ -1692,7 +1726,14 @@ app.post('/api/login', authRateLimiter, withApiError(async (req, res) => {
         const otpValid = verifyTotpToken(otp, user.twoFactorSecret);
 
         if (!otpValid && !backupCodesRemaining) {
+            const failedAttemptState = await recordFailedLoginAttempt(username, clientIp, {
+                maxAttempts: loginMaxFailedAttempts,
+                lockMinutes: loginLockoutMinutes
+            });
             await sleep(350);
+            if (failedAttemptState.isLocked) {
+                return sendLoginLockoutResponse(res, failedAttemptState.lockedUntil);
+            }
             return res.status(401).json({
                 error: 'Invalid authenticator or backup code.',
                 requiresTwoFactor: true
@@ -1704,6 +1745,7 @@ app.post('/api/login', authRateLimiter, withApiError(async (req, res) => {
         }
     }
 
+    await clearLoginAttemptState(username, clientIp);
     const session = await createSession(user.id);
     res.setHeader('Set-Cookie', buildSessionCookie(session.token));
     res.json({
