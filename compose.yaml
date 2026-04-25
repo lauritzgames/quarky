@@ -31,6 +31,8 @@ services:
       DISPOSABLE_EMAIL_DOMAINS: ${DISPOSABLE_EMAIL_DOMAINS:-}
       RECAPTCHA_SITE_KEY: ${RECAPTCHA_SITE_KEY:-}
       RECAPTCHA_SECRET_KEY: ${RECAPTCHA_SECRET_KEY:-}
+     networks:
+      - npm_default
 
   db:
     image: mysql:8.4
