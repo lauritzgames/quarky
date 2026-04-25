@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quarky - Project</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="light-mode">
+    <header class="site-header">
+        <a class="brand" href="/">Quarky</a>
+        <nav class="top-nav">
+            <a href="/">Home</a>
+            <a href="/projects">Projects</a>
+            <a href="/trending">Trending</a>
+            <a id="admin-link" class="nav-hidden" href="/admin" hidden>Admin</a>
+            <a id="auth-link" href="/login">Login</a>
+        </nav>
+        <button id="mode-toggle" class="mode-toggle" aria-label="Toggle color mode">Mode</button>
+    </header>
+
+    <div id="announcement-banner" class="announcement-banner" hidden></div>
+
+    <main class="page-shell page-shell-wide">
+        <section class="project-hero">
+            <div class="project-hero-main">
+                <p class="eyebrow" id="project-type">Project</p>
+                <h1 id="project-title">Project</h1>
+                <p id="project-summary">Loading project details...</p>
+                <div id="project-tags" class="chip-row"></div>
+                <div id="project-owner-list" class="chip-row"></div>
+                <div class="button-row">
+                    <button id="project-like-button" class="btn btn-secondary" type="button">Favorite</button>
+                    <button id="project-report-button" class="btn btn-secondary" type="button">Report</button>
+                    <a id="project-edit-link" class="btn btn-secondary" href="/profile" hidden>Edit In Profile</a>
+                </div>
+            </div>
+            <aside class="project-side-card">
+                <div class="profile-mini">
+                    <img id="project-owner-avatar" class="avatar avatar-sm" src="" alt="" hidden>
+                    <div>
+                        <p class="eyebrow">Creator</p>
+                        <a id="project-owner-link" class="text-link" href="/projects"><strong id="project-owner">-</strong></a>
+                    </div>
+                </div>
+                <div id="project-owner-badges" class="chip-row"></div>
+                <div class="info-row">
+                    <span>Status</span>
+                    <strong id="project-status">-</strong>
+                </div>
+                <div class="info-row">
+                    <span>Visibility</span>
+                    <strong id="project-visibility">-</strong>
+                </div>
+                <div class="info-row">
+                    <span>Views</span>
+                    <strong id="project-view-count">0</strong>
+                </div>
+                <div class="info-row">
+                    <span>Downloads</span>
+                    <strong id="project-download-count">0</strong>
+                </div>
+                <div class="info-row">
+                    <span>Favorites</span>
+                    <strong id="project-like-count">0</strong>
+                </div>
+                <div class="info-row">
+                    <span>Comments</span>
+                    <strong id="project-comment-count">0</strong>
+                </div>
+                <div class="info-row">
+                    <span>Created</span>
+                    <strong id="project-created">-</strong>
+                </div>
+                <div class="info-row">
+                    <span>Updated</span>
+                    <strong id="project-updated">-</strong>
+                </div>
+            </aside>
+        </section>
+
+        <section class="panel section-panel tab-panel-shell">
+            <div class="tab-row">
+                <button class="tab-button active" type="button" data-tab-target="overview">Overview</button>
+                <button class="tab-button" type="button" data-tab-target="files">Files</button>
+                <button class="tab-button" type="button" data-tab-target="devlogs">Devlogs</button>
+                <button class="tab-button" type="button" data-tab-target="updates">Updates</button>
+                <button class="tab-button" type="button" data-tab-target="comments">Comments</button>
+            </div>
+
+            <section class="tab-panel active" data-tab-panel="overview">
+                <div class="content-grid-two">
+                    <article class="panel panel-soft">
+                        <h2>About</h2>
+                        <p id="project-description"></p>
+                        <div class="spaced-section">
+                            <h3>Known Bugs</h3>
+                            <div id="project-known-bugs" class="stack-list"></div>
+                        </div>
+                    </article>
+                    <article class="panel panel-soft">
+                        <h2>Screenshots</h2>
+                        <div id="project-screenshots" class="gallery-grid"></div>
+                        <div class="spaced-section">
+                            <h3>External Links</h3>
+                            <div id="project-external-links" class="stack-list"></div>
+                        </div>
+                    </article>
+                </div>
+            </section>
+
+            <section class="tab-panel" data-tab-panel="files">
+                <div class="section-header">
+                    <div>
+                        <p class="eyebrow">Downloads</p>
+                        <h2>Files</h2>
+                    </div>
+                </div>
+                <ul id="project-downloads" class="download-list"></ul>
+            </section>
+
+            <section class="tab-panel" data-tab-panel="devlogs">
+                <div class="section-header">
+                    <div>
+                        <p class="eyebrow">Behind the build</p>
+                        <h2>Devlogs</h2>
+                    </div>
+                </div>
+                <div id="project-devlogs" class="stack-list"></div>
+            </section>
+
+            <section class="tab-panel" data-tab-panel="updates">
+                <div class="section-header">
+                    <div>
+                        <p class="eyebrow">Release notes</p>
+                        <h2>Changelog</h2>
+                    </div>
+                </div>
+                <div id="project-changelog" class="stack-list"></div>
+            </section>
+
+            <section class="tab-panel" data-tab-panel="comments">
+                <div class="section-header">
+                    <div>
+                        <p class="eyebrow">Discussion</p>
+                        <h2>Comments</h2>
+                    </div>
+                </div>
+                <form id="comment-form" class="stack-form comment-form">
+                    <label for="comment-content">Add Comment</label>
+                    <textarea id="comment-content" rows="4" placeholder="Share feedback, ideas, or a bug report."></textarea>
+                    <button class="btn" type="submit">Post Comment</button>
+                </form>
+                <p id="comment-message" class="helper-text"></p>
+                <div id="project-comments" class="stack-list"></div>
+            </section>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <div class="footer-links">
+            <span>&copy; 2026 Quarky</span>
+            <a href="/privacy">Privacy</a>
+            <a href="/terms">Terms</a>
+        </div>
+    </footer>
+
+    <dialog id="external-link-dialog" class="external-dialog">
+        <form method="dialog" class="stack-form">
+            <h2>Leave Quarky?</h2>
+            <p id="external-link-message" class="helper-text">You are about to open an external website.</p>
+            <div class="button-row">
+                <button id="external-link-cancel" class="btn btn-secondary" value="cancel" type="submit">Cancel</button>
+                <button id="external-link-confirm" class="btn" value="default" type="button">Continue</button>
+            </div>
+        </form>
+    </dialog>
+
+    <script src="/site.js"></script>
+</body>
+</html>

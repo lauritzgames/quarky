@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quarky</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="light-mode">
+    <header class="site-header">
+        <a class="brand" href="/">Quarky</a>
+        <nav class="top-nav">
+            <a href="/">Home</a>
+            <a href="/projects">Projects</a>
+            <a href="/trending">Trending</a>
+            <a id="admin-link" class="nav-hidden" href="/admin" hidden>Admin</a>
+            <a id="auth-link" href="/login">Login</a>
+        </nav>
+        <button id="mode-toggle" class="mode-toggle" aria-label="Toggle color mode">Mode</button>
+    </header>
+
+    <div id="announcement-banner" class="announcement-banner" hidden></div>
+
+    <main class="page-shell page-shell-wide">
+        <section class="hero-card">
+            <div class="hero-copy">
+                <p class="eyebrow">Project platform</p>
+                <h1>Ship projects, build a following, and share updates from one place.</h1>
+                <p class="hero-text">
+                    Quarky brings featured projects, team pages, devlogs, uploads, changelogs, followers,
+                    notifications, and polished creator pages together in one home.
+                </p>
+                <div class="button-row">
+                    <a class="btn" href="/projects">Explore Projects</a>
+                    <a class="btn btn-secondary" href="/profile">Open Profile</a>
+                </div>
+            </div>
+            <div class="hero-stats-grid" id="home-stats">
+                <article class="stat-card">
+                    <span>Total Users</span>
+                    <strong>-</strong>
+                </article>
+                <article class="stat-card">
+                    <span>Public Projects</span>
+                    <strong>-</strong>
+                </article>
+                <article class="stat-card">
+                    <span>Total Downloads</span>
+                    <strong>-</strong>
+                </article>
+                <article class="stat-card">
+                    <span>Total Views</span>
+                    <strong>-</strong>
+                </article>
+            </div>
+        </section>
+
+        <section class="panel section-panel">
+            <div class="section-header">
+                <div>
+                    <p class="eyebrow">Featured</p>
+                    <h2>Highlighted Projects</h2>
+                </div>
+                <a class="text-link" href="/projects">See all</a>
+            </div>
+            <div id="home-featured" class="card-grid"></div>
+        </section>
+
+        <section class="home-columns">
+            <section class="panel section-panel">
+                <div class="section-header">
+                    <div>
+                        <p class="eyebrow">Trending now</p>
+                        <h2>Hot Projects</h2>
+                    </div>
+                    <a class="text-link" href="/trending">Open trending</a>
+                </div>
+                <div id="home-trending" class="stack-list compact-cards"></div>
+            </section>
+
+            <section class="panel section-panel">
+                <div class="section-header">
+                    <div>
+                        <p class="eyebrow">Fresh uploads</p>
+                        <h2>Latest Files</h2>
+                    </div>
+                </div>
+                <div id="home-uploads" class="stack-list"></div>
+            </section>
+
+            <section class="panel section-panel">
+                <div class="section-header">
+                    <div>
+                        <p class="eyebrow">Just updated</p>
+                        <h2>Newest Projects</h2>
+                    </div>
+                </div>
+                <div id="home-newest" class="stack-list compact-cards"></div>
+            </section>
+        </section>
+
+        <section class="panel section-panel">
+            <div class="section-header">
+                <div>
+                    <p class="eyebrow">From people you follow</p>
+                    <h2>Followed Creators Feed</h2>
+                </div>
+            </div>
+            <div id="home-followed-feed" class="card-grid"></div>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <div class="footer-links">
+            <span>&copy; 2026 Quarky</span>
+            <a href="/privacy">Privacy</a>
+            <a href="/terms">Terms</a>
+        </div>
+    </footer>
+
+    <script src="/site.js"></script>
+</body>
+</html>

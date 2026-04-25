@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quarky - Admin</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="light-mode">
+    <header class="site-header">
+        <a class="brand" href="/">Quarky</a>
+        <nav class="top-nav">
+            <a href="/">Home</a>
+            <a href="/projects">Projects</a>
+            <a href="/trending">Trending</a>
+            <a id="admin-link" class="nav-hidden" href="/admin" hidden>Admin</a>
+            <a id="auth-link" href="/profile">Profile</a>
+        </nav>
+        <button id="mode-toggle" class="mode-toggle" aria-label="Toggle color mode">Mode</button>
+    </header>
+
+    <div id="announcement-banner" class="announcement-banner" hidden></div>
+
+    <main class="page-shell page-shell-wide">
+        <section class="page-intro">
+            <p class="eyebrow">Admin panel</p>
+            <h1>Site controls and staff tools</h1>
+            <p>Manage access, send updates, organize projects, and keep the platform running smoothly.</p>
+        </section>
+
+        <section class="dashboard-grid dashboard-grid-large">
+            <article class="panel">
+                <h2>Site Settings</h2>
+                <form id="admin-settings-form" class="stack-form">
+                    <label class="toggle-line">
+                        <input id="settings-registrations-enabled" type="checkbox">
+                        <span>Allow new registrations</span>
+                    </label>
+                    <label class="toggle-line">
+                        <input id="settings-login-enabled" type="checkbox">
+                        <span>Allow non-admin login</span>
+                    </label>
+                    <label class="toggle-line">
+                        <input id="settings-invite-only-enabled" type="checkbox">
+                        <span>Require invite codes for registration</span>
+                    </label>
+                    <label class="toggle-line">
+                        <input id="settings-approval-required" type="checkbox">
+                        <span>Require admin approval before first login</span>
+                    </label>
+                    <label class="toggle-line">
+                        <input id="settings-uploads-enabled" type="checkbox">
+                        <span>Allow file uploads and new project creation</span>
+                    </label>
+                    <label class="toggle-line">
+                        <input id="settings-new-account-restrictions-enabled" type="checkbox">
+                        <span>Enable new-account restrictions</span>
+                    </label>
+                    <label for="settings-new-account-restriction-hours">Restriction time for new accounts (hours)</label>
+                    <input id="settings-new-account-restriction-hours" type="number" min="1" step="1">
+                    <label class="toggle-line">
+                        <input id="settings-project-limit-enabled" type="checkbox">
+                        <span>Enable project limit for non-admin users</span>
+                    </label>
+                    <label for="settings-max-projects">Max projects per non-admin user</label>
+                    <input id="settings-max-projects" type="number" min="1" step="1">
+                    <label class="toggle-line">
+                        <input id="settings-upload-size-limit-enabled" type="checkbox">
+                        <span>Enable upload size limit for non-admin users</span>
+                    </label>
+                    <label for="settings-max-upload-size">Max upload size per file (MB)</label>
+                    <input id="settings-max-upload-size" type="number" min="1" step="1">
+                    <label class="toggle-line">
+                        <input id="settings-trust-level-enabled" type="checkbox">
+                        <span>Enable trust-level anti-spam rules</span>
+                    </label>
+                    <label for="settings-low-trust-age-hours">Hours before a new account becomes trusted</label>
+                    <input id="settings-low-trust-age-hours" type="number" min="1" step="1">
+                    <label for="settings-low-trust-comment-cooldown">Low-trust comment cooldown (seconds)</label>
+                    <input id="settings-low-trust-comment-cooldown" type="number" min="0" step="1">
+                    <label for="settings-low-trust-project-cooldown">Low-trust project cooldown (minutes)</label>
+                    <input id="settings-low-trust-project-cooldown" type="number" min="0" step="1">
+                    <label for="settings-word-blacklist">Blocked words</label>
+                    <textarea id="settings-word-blacklist" rows="6" placeholder="One blocked word or phrase per line"></textarea>
+                    <button class="btn" type="submit">Save Settings</button>
+                </form>
+                <p id="admin-settings-message" class="helper-text"></p>
+            </article>
+
+            <article class="panel">
+                <h2>Announcement</h2>
+                <form id="admin-announcement-form" class="stack-form">
+                    <label class="toggle-line">
+                        <input id="settings-announcement-enabled" type="checkbox">
+                        <span>Show announcement banner</span>
+                    </label>
+                    <label for="settings-announcement-text">Message</label>
+                    <textarea id="settings-announcement-text" rows="4" placeholder="Service message, release note, maintenance notice..."></textarea>
+                    <label for="settings-announcement-link">Optional link</label>
+                    <input id="settings-announcement-link" type="text" placeholder="/projects or https://example.com">
+                    <div class="button-row">
+                        <button class="btn" type="submit">Send Announcement</button>
+                        <button id="clear-announcement-button" class="btn btn-secondary" type="button">Clear Announcement</button>
+                    </div>
+                </form>
+                <p id="admin-announcement-message" class="helper-text"></p>
+            </article>
+
+            <article class="panel">
+                <h2>Storage Dashboard</h2>
+                <p id="admin-storage-total" class="helper-text">Loading storage usage...</p>
+                <div id="admin-storage-users" class="stack-list"></div>
+            </article>
+
+            <article class="panel">
+                <h2>Invite Codes</h2>
+                <form id="admin-invite-form" class="stack-form">
+                    <label for="invite-uses-remaining">Uses per code</label>
+                    <input id="invite-uses-remaining" type="number" min="1" step="1" value="1">
+                    <label for="invite-expires-days">Expires in days (optional)</label>
+                    <input id="invite-expires-days" type="number" min="1" step="1" placeholder="Leave blank for no expiry">
+                    <button class="btn" type="submit">Create Invite Code</button>
+                </form>
+                <p id="admin-invite-message" class="helper-text"></p>
+                <div id="admin-invites" class="stack-list"></div>
+            </article>
+        </section>
+
+        <section class="panel section-panel">
+            <div class="section-header">
+                <div>
+                    <p class="eyebrow">Team management</p>
+                    <h2>All Users</h2>
+                </div>
+            </div>
+            <p id="admin-message" class="helper-text"></p>
+            <div id="admin-users" class="stack-list"></div>
+        </section>
+
+        <section class="panel section-panel">
+            <div class="section-header">
+                <div>
+                    <p class="eyebrow">Reports queue</p>
+                    <h2>Project And Comment Reports</h2>
+                </div>
+                <button id="clear-reports-button" class="btn btn-secondary" type="button">Clear All Reports</button>
+            </div>
+            <div id="admin-reports" class="stack-list"></div>
+        </section>
+
+        <section class="panel section-panel">
+            <div class="section-header">
+                <div>
+                    <p class="eyebrow">Project tools</p>
+                    <h2>All Projects</h2>
+                </div>
+            </div>
+            <div id="admin-projects" class="card-grid"></div>
+        </section>
+
+        <section class="panel section-panel">
+            <div class="section-header">
+                <div>
+                    <p class="eyebrow">Audit trail</p>
+                    <h2>Recent Admin Actions</h2>
+                </div>
+            </div>
+            <div id="admin-audit-log" class="stack-list"></div>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <div class="footer-links">
+            <span>&copy; 2026 Quarky</span>
+            <a href="/privacy">Privacy</a>
+            <a href="/terms">Terms</a>
+        </div>
+    </footer>
+
+    <script src="/site.js"></script>
+</body>
+</html>

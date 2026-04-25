@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quarky - Projects</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="light-mode">
+    <header class="site-header">
+        <a class="brand" href="/">Quarky</a>
+        <nav class="top-nav">
+            <a href="/">Home</a>
+            <a href="/projects">Projects</a>
+            <a href="/trending">Trending</a>
+            <a id="admin-link" class="nav-hidden" href="/admin" hidden>Admin</a>
+            <a id="auth-link" href="/login">Login</a>
+        </nav>
+        <button id="mode-toggle" class="mode-toggle" aria-label="Toggle color mode">Mode</button>
+    </header>
+
+    <div id="announcement-banner" class="announcement-banner" hidden></div>
+
+    <main class="page-shell page-shell-wide">
+        <section class="page-intro">
+            <p class="eyebrow">Projects</p>
+            <h1>Browse public builds</h1>
+            <p>Search, filter by category, narrow by tags, and discover featured work in real time.</p>
+        </section>
+
+        <section class="panel filter-panel">
+            <div class="filter-grid">
+                <label class="stack-label" for="projects-search">
+                    <span>Search</span>
+                    <input id="projects-search" type="search" placeholder="Search projects, tags, owners...">
+                </label>
+                <label class="stack-label" for="projects-category">
+                    <span>Category</span>
+                    <select id="projects-category">
+                        <option value="">All categories</option>
+                    </select>
+                </label>
+                <label class="stack-label" for="projects-tag">
+                    <span>Tag</span>
+                    <select id="projects-tag">
+                        <option value="">All tags</option>
+                    </select>
+                </label>
+                <label class="toggle-line featured-toggle">
+                    <input id="projects-featured" type="checkbox">
+                    <span>Only featured projects</span>
+                </label>
+            </div>
+            <p id="projects-filter-summary" class="helper-text"></p>
+        </section>
+
+        <section id="projects-list" class="card-grid"></section>
+    </main>
+
+    <footer class="site-footer">
+        <div class="footer-links">
+            <span>&copy; 2026 Quarky</span>
+            <a href="/privacy">Privacy</a>
+            <a href="/terms">Terms</a>
+        </div>
+    </footer>
+
+    <script src="/site.js"></script>
+</body>
+</html>

@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quarky - Profile</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="light-mode">
+    <header class="site-header">
+        <a class="brand" href="/">Quarky</a>
+        <nav class="top-nav">
+            <a href="/">Home</a>
+            <a href="/projects">Projects</a>
+            <a href="/trending">Trending</a>
+            <a id="admin-link" class="nav-hidden" href="/admin" hidden>Admin</a>
+            <a id="auth-link" href="/profile">Profile</a>
+        </nav>
+        <button id="mode-toggle" class="mode-toggle" aria-label="Toggle color mode">Mode</button>
+    </header>
+
+    <div id="announcement-banner" class="announcement-banner" hidden></div>
+
+    <main class="page-shell page-shell-wide">
+        <section class="profile-hero">
+            <div class="profile-banner-shell">
+                <img id="profile-banner-display" class="banner-image" src="" alt="" hidden>
+            </div>
+            <div class="profile-hero-body">
+                <img id="profile-avatar-display" class="avatar avatar-lg" src="" alt="" hidden>
+                <div class="profile-hero-copy">
+                    <p class="eyebrow">Your profile</p>
+                    <h1 id="profile-display-username">Profile</h1>
+                    <p id="profile-display-bio">Customize your profile, uploads, and security settings here.</p>
+                    <div class="chip-row">
+                        <span class="status-chip" id="profile-role-chip">User</span>
+                        <span class="status-chip status-chip-muted" id="profile-project-count-chip">0 projects</span>
+                        <span class="status-chip status-chip-muted" id="profile-followers-chip">0 followers</span>
+                        <span class="status-chip status-chip-muted" id="profile-following-chip">0 following</span>
+                    </div>
+                    <div id="profile-badges" class="chip-row"></div>
+                    <p id="profile-force-reset" class="helper-text warning-text" hidden></p>
+                </div>
+            </div>
+        </section>
+
+        <section class="dashboard-grid dashboard-grid-large">
+            <article class="panel">
+                <h2>Account</h2>
+                <div class="info-row">
+                    <span>User ID</span>
+                    <strong id="settings-user-id">-</strong>
+                </div>
+                <div class="info-row">
+                    <span>Username</span>
+                    <strong id="settings-username">-</strong>
+                </div>
+                <div class="info-row">
+                    <span>Email</span>
+                    <strong id="settings-email">-</strong>
+                </div>
+                <div class="info-row">
+                    <span>Role</span>
+                    <strong id="settings-role">-</strong>
+                </div>
+                <div class="info-row">
+                    <span>2FA</span>
+                    <strong id="settings-two-factor">-</strong>
+                </div>
+                <button id="logout-button" class="btn btn-block" type="button">Logout</button>
+                <p id="profile-message" class="helper-text"></p>
+            </article>
+
+            <article class="panel">
+                <h2>Profile Media</h2>
+                <form id="profile-form" class="stack-form">
+                    <label for="profile-bio-input">Bio</label>
+                    <textarea id="profile-bio-input" rows="5" placeholder="Tell people what you build, what you like, and what they should expect."></textarea>
+                    <label for="profile-avatar-file">Avatar</label>
+                    <input id="profile-avatar-file" type="file" accept=".png,.jpg,.jpeg,.gif,.webp,.bmp,.ico">
+                    <label class="toggle-line">
+                        <input id="profile-remove-avatar" type="checkbox">
+                        <span>Remove current avatar</span>
+                    </label>
+                    <label for="profile-banner-file">Profile banner</label>
+                    <input id="profile-banner-file" type="file" accept=".png,.jpg,.jpeg,.gif,.webp,.bmp">
+                    <label class="toggle-line">
+                        <input id="profile-remove-banner" type="checkbox">
+                        <span>Remove current banner</span>
+                    </label>
+                    <button class="btn" type="submit">Save Profile</button>
+                </form>
+                <p id="profile-form-message" class="helper-text"></p>
+            </article>
+
+            <article class="panel">
+                <h2>Password</h2>
+                <form id="password-form" class="stack-form">
+                    <label for="current-password-input">Current password</label>
+                    <input id="current-password-input" type="password" autocomplete="current-password" placeholder="Current password">
+                    <label for="new-password-input">New password</label>
+                    <input id="new-password-input" type="password" autocomplete="new-password" placeholder="New password">
+                    <button class="btn" type="submit">Change Password</button>
+                </form>
+                <p id="password-message" class="helper-text"></p>
+            </article>
+        </section>
+
+        <section class="dashboard-grid dashboard-grid-large">
+            <article class="panel section-panel">
+                <div class="section-header">
+                    <div>
+                        <p class="eyebrow">Account security</p>
+                        <h2>Two-Factor Authentication</h2>
+                    </div>
+                </div>
+                <p id="two-factor-status" class="helper-text"></p>
+                <div class="stack-list">
+                    <button id="two-factor-start-button" class="btn btn-secondary" type="button">Create 2FA Secret</button>
+                    <div id="two-factor-setup-box" class="secret-box" hidden>
+                        <p class="helper-text">Save this secret in your authenticator app before confirming the first code.</p>
+                        <div class="info-row">
+                            <span>Secret Key</span>
+                            <strong id="two-factor-secret">-</strong>
+                        </div>
+                        <p class="helper-text"><a id="two-factor-otpauth" href="#" target="_blank" rel="noopener noreferrer">Open setup link</a></p>
+                        <form id="two-factor-enable-form" class="stack-form">
+                            <label for="two-factor-enable-token">Authenticator Code</label>
+                            <input id="two-factor-enable-token" type="text" inputmode="numeric" autocomplete="one-time-code" placeholder="123456">
+                            <button class="btn" type="submit">Enable 2FA</button>
+                        </form>
+                    </div>
+                    <div id="two-factor-backup-box" class="secret-box" hidden>
+                        <h3>Backup Codes</h3>
+                        <p class="helper-text">Store these in a safe place. Each one works only once.</p>
+                        <pre id="two-factor-backup-codes" class="secret-list"></pre>
+                    </div>
+                    <form id="two-factor-disable-form" class="stack-form" hidden>
+                        <label for="two-factor-disable-password">Current Password</label>
+                        <input id="two-factor-disable-password" type="password" autocomplete="current-password" placeholder="Current password">
+                        <label for="two-factor-disable-token">Authenticator Or Backup Code</label>
+                        <input id="two-factor-disable-token" type="text" inputmode="numeric" autocomplete="one-time-code" placeholder="123456 or backup code">
+                        <button class="btn btn-danger" type="submit">Disable 2FA</button>
+                    </form>
+                </div>
+                <p id="two-factor-message" class="helper-text"></p>
+            </article>
+
+            <article class="panel section-panel">
+                <div class="section-header">
+                    <div>
+                        <p class="eyebrow">Inbox</p>
+                        <h2>Notifications</h2>
+                    </div>
+                    <button id="notifications-mark-read" class="btn btn-secondary" type="button">Mark All Read</button>
+                </div>
+                <div id="notifications-list" class="stack-list"></div>
+            </article>
+        </section>
+
+        <section class="panel section-panel">
+            <div class="section-header">
+                <div>
+                    <p class="eyebrow">Build</p>
+                    <h2 id="project-form-title">Create Project</h2>
+                    <p class="helper-text">A more storefront-style editor with separate sections for content, media, links, and devlogs.</p>
+                </div>
+            </div>
+            <form id="project-form" class="project-editor-shell">
+                <input id="project-id" type="hidden">
+                <aside class="panel panel-soft editor-sidebar">
+                    <p class="eyebrow">Quick setup</p>
+                    <label class="stack-label" for="project-name">
+                        <span>Project Name</span>
+                        <input id="project-name" name="title" type="text" placeholder="Project name" required>
+                    </label>
+                    <label class="stack-label" for="project-summary-input">
+                        <span>Summary</span>
+                        <input id="project-summary-input" name="summary" type="text" placeholder="One-line hook for the card and hero">
+                    </label>
+                    <div class="form-grid">
+                        <label class="stack-label" for="project-type-input">
+                            <span>Category</span>
+                            <input id="project-type-input" name="type" type="text" placeholder="Game, Website, Tool">
+                        </label>
+                        <label class="stack-label" for="project-status-input">
+                            <span>Status</span>
+                            <input id="project-status-input" name="status" type="text" placeholder="Draft, Active, Released">
+                        </label>
+                    </div>
+                    <label class="stack-label" for="project-visibility-input">
+                        <span>Visibility</span>
+                        <select id="project-visibility-input" name="visibility">
+                            <option value="public">Public</option>
+                            <option value="unlisted">Unlisted</option>
+                            <option value="private">Private</option>
+                        </select>
+                    </label>
+                    <label class="stack-label" for="project-owners-input">
+                        <span>Team owners</span>
+                        <textarea id="project-owners-input" rows="4" placeholder="Add usernames separated by commas or new lines"></textarea>
+                    </label>
+                    <label class="stack-label" for="project-tags-input">
+                        <span>Tags</span>
+                        <input id="project-tags-input" name="tags" type="text" placeholder="mods, pvp, portfolio, game jam">
+                    </label>
+                    <label class="toggle-line admin-only-field" id="project-featured-wrap" hidden>
+                        <input id="project-featured-input" name="featured" type="checkbox">
+                        <span>Feature this project on the homepage</span>
+                    </label>
+                </aside>
+
+                <div class="editor-main">
+                    <section class="panel panel-soft editor-section">
+                        <div class="section-header compact-header">
+                            <div>
+                                <p class="eyebrow">Story</p>
+                                <h3>Overview</h3>
+                            </div>
+                        </div>
+                        <label for="project-description-input">Description</label>
+                        <textarea id="project-description-input" name="description" rows="8" placeholder="Describe the project, the vibe, the features, and the pitch." required></textarea>
+                    </section>
+
+                    <section class="panel panel-soft editor-section">
+                        <div class="section-header compact-header">
+                            <div>
+                                <p class="eyebrow">Progress</p>
+                                <h3>Devlogs and release notes</h3>
+                            </div>
+                        </div>
+                        <label for="project-devlogs-input">Devlogs</label>
+                        <textarea id="project-devlogs-input" rows="6" placeholder="One entry per line. Use title | details."></textarea>
+                        <label for="project-changelog-input">Changelog</label>
+                        <textarea id="project-changelog-input" name="changelog" rows="6" placeholder="One update per line. Use title | details if you want extra text."></textarea>
+                    </section>
+
+                    <section class="panel panel-soft editor-section">
+                        <div class="section-header compact-header">
+                            <div>
+                                <p class="eyebrow">Info</p>
+                                <h3>Bugs and external links</h3>
+                            </div>
+                        </div>
+                        <label for="project-known-bugs-input">Known bugs</label>
+                        <textarea id="project-known-bugs-input" rows="5" placeholder="One issue per line. Use title | details."></textarea>
+                        <label for="project-external-links-input">External links</label>
+                        <textarea id="project-external-links-input" rows="5" placeholder="One link per line. Use Label | https://example.com"></textarea>
+                    </section>
+
+                    <section class="panel panel-soft editor-section">
+                        <div class="section-header compact-header">
+                            <div>
+                                <p class="eyebrow">Media</p>
+                                <h3>Uploads</h3>
+                            </div>
+                        </div>
+                        <label for="project-files-input">Project Files</label>
+                        <input id="project-files-input" name="projectFiles" type="file" multiple>
+                        <label for="project-screenshots-input">Screenshots</label>
+                        <input id="project-screenshots-input" name="projectScreenshots" type="file" multiple accept=".png,.jpg,.jpeg,.gif,.webp,.bmp">
+                        <p id="project-upload-summary" class="helper-text"></p>
+                        <div class="project-existing-grid">
+                            <div>
+                                <label>Existing Files</label>
+                                <div id="existing-project-files" class="stack-list compact-list"></div>
+                            </div>
+                            <div>
+                                <label>Existing Screenshots</label>
+                                <div id="existing-project-screenshots" class="stack-list compact-list"></div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <div class="button-row">
+                        <button type="submit" class="btn">Save Project</button>
+                        <button id="cancel-edit-button" type="button" class="btn btn-secondary">Cancel Edit</button>
+                    </div>
+                </div>
+            </form>
+            <p id="project-form-message" class="helper-text"></p>
+        </section>
+
+        <section class="panel section-panel">
+            <div class="section-header">
+                <div>
+                    <p class="eyebrow">Your work</p>
+                    <h2>Your Projects</h2>
+                </div>
+            </div>
+            <section id="profile-projects" class="card-grid"></section>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <div class="footer-links">
+            <span>&copy; 2026 Quarky</span>
+            <a href="/privacy">Privacy</a>
+            <a href="/terms">Terms</a>
+        </div>
+    </footer>
+
+    <script src="/site.js"></script>
+</body>
+</html>

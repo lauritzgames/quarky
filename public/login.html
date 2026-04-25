@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quarky - Login</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="light-mode">
+    <header class="site-header">
+        <a class="brand" href="/">Quarky</a>
+        <nav class="top-nav">
+            <a href="/">Home</a>
+            <a href="/projects">Projects</a>
+            <a id="admin-link" class="nav-hidden" href="/admin" hidden>Admin</a>
+            <a id="auth-link" href="/login">Login</a>
+        </nav>
+        <button id="mode-toggle" class="mode-toggle" aria-label="Toggle color mode">Mode</button>
+    </header>
+
+    <div id="announcement-banner" class="announcement-banner" hidden></div>
+
+    <main class="page-shell">
+        <section class="auth-card">
+            <p class="eyebrow">Account</p>
+            <h1>Login</h1>
+            <form id="login-form" class="stack-form">
+                <label for="login-username">Username</label>
+                <input id="login-username" name="username" type="text" placeholder="Enter username" required>
+                <label for="login-password">Password</label>
+                <input id="login-password" name="password" type="password" placeholder="Enter password" required>
+                <div id="login-otp-group" hidden>
+                    <label for="login-otp">Authenticator Or Backup Code</label>
+                    <input id="login-otp" name="otp" type="text" inputmode="numeric" autocomplete="one-time-code" placeholder="6-digit code or backup code">
+                </div>
+                <button type="submit" class="btn btn-block">Login</button>
+            </form>
+            <p id="login-message" class="helper-text"></p>
+            <p id="login-helper" class="helper-text">Need an account? <a id="register-link" href="/register">Register</a></p>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <div class="footer-links">
+            <span>&copy; 2026 Quarky</span>
+            <a href="/privacy">Privacy</a>
+            <a href="/terms">Terms</a>
+        </div>
+    </footer>
+
+    <script src="/site.js"></script>
+</body>
+</html>
