@@ -1,0 +1,49 @@
+services:
+  app:
+    image: ${APP_IMAGE:-yourdockerhubname/quarky:latest}
+    container_name: quarky-app
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - .env.container
+    ports:
+      - "3000:3000" 
+    volumes:
+      - quarky_files:/app/files
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      MYSQL_HOST: db
+      MYSQL_PORT: 3306
+      MYSQL_USER: quarky
+      MYSQL_DATABASE: quarky
+
+  db:
+    image: mysql:8.4
+    container_name: quarky-db
+    restart: unless-stopped
+    env_file:
+      - .env.container
+    environment:
+      MYSQL_DATABASE: quarky
+      MYSQL_USER: quarky
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -p$$MYSQL_ROOT_PASSWORD || exit 1"]
+      start_period: 120s
+      interval: 15s
+      timeout: 5s
+      retries: 20
+    networks:
+      - npm_default
+
+volumes:
+  mysql_data:
+  quarky_files:
+
+networks:
+  npm_default:
+    external: true
